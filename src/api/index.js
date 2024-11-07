@@ -21,7 +21,16 @@ export async function getWeatherData(endpoint, place_id, measurementSystem) {
     const response = await axios.request(options)
     return response.data
   } catch (error) {
-    console.error(error)
+    if (error.response && error.response.status === 429) {
+      const retryAfter = error.response.headers["retry-after"] // Mendapatkan header Retry-After jika ada
+      console.error(`Rate limit exceeded. Retry after ${retryAfter} seconds.`)
+      // Kamu bisa menunggu dan mencoba ulang setelah waktu yang disarankan
+      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
+      return getWeatherData(endpoint, place_id, measurementSystem) // Coba lagi setelah waktu tunggu
+    } else {
+      console.error("Axios Error:", error)
+      throw error
+    }
   }
 }
 
@@ -43,6 +52,15 @@ export async function searchPlaces(text) {
     const response = await axios.request(options)
     return response.data
   } catch (error) {
-    console.error(error)
+    if (error.response && error.response.status === 429) {
+      const retryAfter = error.response.headers["retry-after"] // Mendapatkan header Retry-After jika ada
+      console.error(`Rate limit exceeded. Retry after ${retryAfter} seconds.`)
+      // Kamu bisa menunggu dan mencoba ulang setelah waktu yang disarankan
+      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
+      return getWeatherData(endpoint, place_id, measurementSystem) // Coba lagi setelah waktu tunggu
+    } else {
+      console.error("Axios Error:", error)
+      throw error
+    }
   }
 }
